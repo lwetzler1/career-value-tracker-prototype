@@ -29,7 +29,8 @@
         <h2>Historical context</h2>
         <p class="intro">Nicknames and approximate dates are enough.</p>
         <div class="context">
-          <div class="field"><label for="historicalOutcome">What happened?</label><select id="historicalOutcome"><option value="">Select one</option><option>Accepted</option><option>Declined</option><option>Withdrew</option><option>No offer</option><option>Other</option></select></div>
+          <div class="field"><label for="historicalOutcome">What ultimately happened with this historical opportunity?</label><select id="historicalOutcome"><option value="">Select one</option><option>Accepted the offer</option><option>Withdrew from the process</option><option>Declined the offer</option><option>No offer was made</option><option>Other</option></select></div>
+          <div class="field" id="historicalOutcomeOtherField" hidden><label for="historicalOutcomeOther">Please describe what happened</label><textarea id="historicalOutcomeOther" placeholder="Optional context"></textarea></div>
           <div class="field"><label for="decisionDate">Approximate decision date/year (optional)</label><input id="decisionDate" placeholder="e.g., 2024 or Spring 2025" /></div>
           <div class="field"><label for="currentRoleNickname">Current-role nickname (optional)</label><input id="currentRoleNickname" placeholder="e.g., Current operations role" /></div>
           <div class="field"><label for="opportunityRoleNickname">Opportunity role/title nickname (optional)</label><input id="opportunityRoleNickname" placeholder="e.g., Strategy manager opportunity" /></div>
@@ -42,8 +43,8 @@
         <h2>Contemporaneous threshold (optional context only)</h2>
         <p class="intro">Do not reconstruct a threshold now. Record one only if it genuinely existed at the time, such as a number already communicated to a recruiter. It will not validate a retrospective target verdict.</p>
         <div class="context">
-          <div class="field"><label for="thresholdStatus">Did you have an explicit threshold at the time?</label><select id="thresholdStatus"><option value="not_sure">Not sure</option><option value="had_explicit">Had an explicit threshold at the time</option><option value="did_not">Did not have an explicit threshold</option></select></div>
-          <div class="field"><label for="thresholdValue">Contemporaneous threshold, if one existed</label><input id="thresholdValue" placeholder="e.g., at least $15,000 more or 10%" disabled /></div>
+          <div class="field"><label for="thresholdStatus">At the time, did you already have a minimum salary or compensation level you knew you would need to leave your current job?</label><select id="thresholdStatus"><option value="not_sure">Not sure</option><option value="had_explicit">Yes</option><option value="did_not">No</option></select></div>
+          <div class="field"><label for="thresholdValue">Historical requirement (context only)</label><input id="thresholdValue" placeholder="e.g., at least $15,000 more or 10%" disabled /></div>
           <div class="field"><label for="thresholdProvenance">How well do you remember it?</label><select id="thresholdProvenance" disabled><option value="confirmed">Documented or explicitly communicated</option><option value="estimated">Clearly remembered, not documented</option></select></div>
           <div class="field"><label for="thresholdNote">Context note (optional)</label><textarea id="thresholdNote" placeholder="Where did it come from?" disabled></textarea></div>
         </div>
@@ -127,11 +128,15 @@
     }
     document.querySelectorAll(".research-field").forEach(row=>{row.querySelector('[data-part="state"]').addEventListener("change",()=>{availability(row);persist(false)});row.querySelectorAll("input").forEach(input=>input.addEventListener("input",()=>persist(false)));availability(row);});
     const thresholdStatus=document.getElementById("thresholdStatus");
+    const historicalOutcome=document.getElementById("historicalOutcome");
+    const historicalOutcomeOtherField=document.getElementById("historicalOutcomeOtherField");
     const thresholdFields=["thresholdValue","thresholdProvenance","thresholdNote"].map(id=>document.getElementById(id));
     function thresholdAvailability(){const enabled=thresholdStatus.value==="had_explicit";thresholdFields.forEach(x=>{x.disabled=!enabled;if(!enabled&&x.id!=="thresholdProvenance")x.value=""})}
     thresholdStatus.addEventListener("change",()=>{thresholdAvailability();persist(false)});thresholdAvailability();
+    function historicalOutcomeAvailability(){historicalOutcomeOtherField.hidden=historicalOutcome.value!=="Other";if(historicalOutcome.value!=="Other")document.getElementById("historicalOutcomeOther").value=""}
+    historicalOutcome.addEventListener("change",()=>{historicalOutcomeAvailability();persist(false)});historicalOutcomeAvailability();
     document.querySelectorAll("#intakeForm input,#intakeForm select,#intakeForm textarea").forEach(x=>{x.addEventListener("change",()=>persist(false));x.addEventListener("input",()=>persist(false))});
-    const contextIds=["historicalOutcome","decisionDate","currentRoleNickname","opportunityRoleNickname","currentCompanyNickname","opportunityCompanyNickname","thresholdStatus","thresholdValue","thresholdProvenance","thresholdNote","participantNotes"];
+    const contextIds=["historicalOutcome","historicalOutcomeOther","decisionDate","currentRoleNickname","opportunityRoleNickname","currentCompanyNickname","opportunityCompanyNickname","thresholdStatus","thresholdValue","thresholdProvenance","thresholdNote","participantNotes"];
     function collect(){
       const context={};contextIds.forEach(id=>{const x=document.getElementById(id);context[id]=x.disabled?null:x.value});
       const fields={};document.querySelectorAll(".research-field").forEach(row=>{const state=row.querySelector('[data-part="state"]').value,known=state==="Confirmed"||state==="Estimated";fields[row.dataset.field]={state,low_or_amount:known?row.querySelector('[data-part="low"]').value:null,high:known?(row.querySelector('[data-part="high"]').value||null):null,unit_or_frequency:known?row.querySelector('[data-part="unit"]').value:null}});
@@ -139,7 +144,7 @@
     }
     function apply(data){
       if(!data||data.schema_version!=="retrospective-intake-v1")return;
-      Object.entries(data.context||{}).forEach(([id,value])=>{const x=document.getElementById(id);if(x&&value!==null&&value!==undefined)x.value=value});thresholdAvailability();
+      Object.entries(data.context||{}).forEach(([id,value])=>{const x=document.getElementById(id);if(x&&value!==null&&value!==undefined)x.value=value});thresholdAvailability();historicalOutcomeAvailability();
       Object.entries(data.fields||{}).forEach(([key,value])=>{const row=document.querySelector(`[data-field="${CSS.escape(key)}"]`);if(!row)return;row.querySelector('[data-part="state"]').value=value.state||"Unknown";availability(row);if(value.state==="Confirmed"||value.state==="Estimated"){row.querySelector('[data-part="low"]').value=value.low_or_amount||"";row.querySelector('[data-part="high"]').value=value.high||"";row.querySelector('[data-part="unit"]').value=value.unit_or_frequency||""}});
     }
     function setStatus(message){document.getElementById("saveStatus").textContent=message}

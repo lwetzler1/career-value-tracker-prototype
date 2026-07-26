@@ -1,3 +1,3 @@
 # Career Value Tracker
 
-Early research prototype. Static prototype used for usability research. No production services or payment processing.
+Early research prototype. Static demonstration only; no accounts, payment processing, backend services, or production calculations are included.
