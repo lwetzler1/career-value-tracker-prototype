@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Career Value Tracker — Research Prototype</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="research-ribbon">Research prototype · local-only · no payment is processed</div>
+    <header class="topbar">
+      <button class="brand" data-route="landing" aria-label="Career Value Tracker home">
+        <span class="brand-mark">CV</span><span>Career Value Tracker</span>
+      </button>
+      <nav id="mainNav" aria-label="Prototype navigation"></nav>
+      <button class="quiet-button" id="researchToggle" hidden>Research controls</button>
+    </header>
+    <aside id="researchPanel" class="research-panel" hidden>
+      <div class="panel-head"><strong>Research controls</strong><button class="icon-button" id="closeResearch" aria-label="Close research controls">×</button></div>
+      <label for="fixtureSelect">Load a report fixture</label>
+      <select id="fixtureSelect"></select>
+      <p>Fixtures populate presentation states only. They do not run the production calculation engine.</p>
+      <button class="secondary-button" id="resetLog">Reset local event log</button>
+      <button class="secondary-button" id="downloadLog">Download event log (JSON)</button>
+      <details><summary>Event log</summary><pre id="eventLog"></pre></details>
+    </aside>
+    <main id="app" tabindex="-1"></main>
+    <div id="toast" role="status" aria-live="polite"></div>
+    <script src="app.js"></script>
+  </body>
+</html>
