@@ -14,7 +14,7 @@
   <div class="ribbon">Retrospective research intake · no account · no network submission</div>
   <header class="shell">
     <div class="eyebrow">Career Value Tracker research</div>
-    <h1>Reconstruct a prior job decision.</h1>
+    <h1>Reconstruct a prior external-opportunity decision.</h1>
     <p>Use rounded figures and leave anything Unknown when you did not know it at the time. This intake prepares a personalized retrospective comparison; it is not a live calculation or recommendation.</p>
     <div class="notice"><strong>Before using this page:</strong> the researcher should already have captured the separate, unaided pre-exposure baseline. This page intentionally does not ask for or repeat that answer.</div>
     <div class="privacy">
@@ -32,10 +32,10 @@
           <div class="field"><label for="historicalOutcome">What ultimately happened with this historical opportunity?</label><select id="historicalOutcome"><option value="">Select one</option><option>Accepted the offer</option><option>Withdrew from the process</option><option>Declined the offer</option><option>No offer was made</option><option>Other</option></select></div>
           <div class="field" id="historicalOutcomeOtherField" hidden><label for="historicalOutcomeOther">Please describe what happened</label><textarea id="historicalOutcomeOther" placeholder="Optional context"></textarea></div>
           <div class="field"><label for="decisionDate">Approximate decision date/year (optional)</label><input id="decisionDate" placeholder="e.g., 2024 or Spring 2025" /></div>
-          <div class="field"><label for="currentRoleNickname">Current-role nickname (optional)</label><input id="currentRoleNickname" placeholder="e.g., Current operations role" /></div>
-          <div class="field"><label for="opportunityRoleNickname">Opportunity role/title nickname (optional)</label><input id="opportunityRoleNickname" placeholder="e.g., Strategy manager opportunity" /></div>
-          <div class="field"><label for="currentCompanyNickname">Current company nickname/name (optional)</label><input id="currentCompanyNickname" placeholder="Optional" /></div>
-          <div class="field"><label for="opportunityCompanyNickname">Opportunity company nickname/name (optional)</label><input id="opportunityCompanyNickname" placeholder="Optional" /></div>
+          <div class="field"><label for="currentRoleNickname">Job you held at the time — role nickname (optional)</label><input id="currentRoleNickname" placeholder="e.g., Operations role before the decision" /></div>
+          <div class="field"><label for="opportunityRoleNickname">Historical external opportunity — role/title nickname (optional)</label><input id="opportunityRoleNickname" placeholder="e.g., Strategy manager opportunity" /></div>
+          <div class="field"><label for="currentCompanyNickname">Job you held at the time — company nickname/name (optional)</label><input id="currentCompanyNickname" placeholder="Optional" /></div>
+          <div class="field"><label for="opportunityCompanyNickname">Historical external opportunity — company nickname/name (optional)</label><input id="opportunityCompanyNickname" placeholder="Optional" /></div>
         </div>
       </section>
 
@@ -43,18 +43,18 @@
         <h2>Contemporaneous threshold (optional context only)</h2>
         <p class="intro">Do not reconstruct a threshold now. Record one only if it genuinely existed at the time, such as a number already communicated to a recruiter. It will not validate a retrospective target verdict.</p>
         <div class="context">
-          <div class="field"><label for="thresholdStatus">At the time, did you already have a minimum salary or compensation level you knew you would need to leave your current job?</label><select id="thresholdStatus"><option value="not_sure">Not sure</option><option value="had_explicit">Yes</option><option value="did_not">No</option></select></div>
+          <div class="field"><label for="thresholdStatus">At the time, did you already have a minimum salary or compensation level you knew you would need to leave the job you held at the time?</label><select id="thresholdStatus"><option value="not_sure">Not sure</option><option value="had_explicit">Yes</option><option value="did_not">No</option></select></div>
           <div class="field"><label for="thresholdValue">Historical requirement (context only)</label><input id="thresholdValue" placeholder="e.g., at least $15,000 more or 10%" disabled /></div>
           <div class="field"><label for="thresholdProvenance">How well do you remember it?</label><select id="thresholdProvenance" disabled><option value="confirmed">Documented or explicitly communicated</option><option value="estimated">Clearly remembered, not documented</option></select></div>
           <div class="field"><label for="thresholdNote">Context note (optional)</label><textarea id="thresholdNote" placeholder="Where did it come from?" disabled></textarea></div>
         </div>
       </section>
 
-      <details open><summary>1. Current job — recurring economics</summary><div class="body"><p class="intro">Use annual amounts when possible. A low/high range is welcome.</p><div data-section="current.core"></div></div></details>
-      <details open><summary>2. Historical opportunity — recurring economics</summary><div class="body"><p class="intro">Enter only what was known or reasonably estimated during the real decision.</p><div data-section="opportunity.core"></div></div></details>
-      <details><summary>3. Current job — time and work arrangement</summary><div class="body"><div data-section="current.time"></div></div></details>
-      <details><summary>4. Historical opportunity — time and work arrangement</summary><div class="body"><div data-section="opportunity.time"></div></div></details>
-      <details><summary>5. One-time transition and first 12 months</summary><div class="body"><h3>Current-role losses or offsets</h3><div data-section="current.transition"></div><h3>Opportunity one-time support</h3><div data-section="opportunity.transition"></div></div></details>
+      <details open><summary>1. Job you held at the time — recurring economics</summary><div class="body"><p class="intro">Use annual amounts when possible. A low/high range is welcome.</p><div data-section="current.core"></div></div></details>
+      <details open><summary>2. Historical external opportunity — recurring economics</summary><div class="body"><p class="intro">Enter only what was known or reasonably estimated during the real decision.</p><div data-section="opportunity.core"></div></div></details>
+      <details><summary>3. Job you held at the time — time and work arrangement</summary><div class="body"><div data-section="current.time"></div></div></details>
+      <details><summary>4. Historical external opportunity — time and work arrangement</summary><div class="body"><div data-section="opportunity.time"></div></div></details>
+      <details><summary>5. One-time transition and first 12 months</summary><div class="body"><h3>Job you held at the time — losses or offsets</h3><div data-section="current.transition"></div><h3>Historical external opportunity — one-time support</h3><div data-section="opportunity.transition"></div></div></details>
       <details><summary>6. Hard-condition facts that genuinely mattered at the time</summary><div class="body"><p class="intro">Optional. Do not invent conditions after the fact.</p><div data-section="conditions"></div></div></details>
 
       <section class="card"><h2>Optional researcher context</h2><div class="field"><label for="participantNotes">Anything else the researcher should know?</label><textarea id="participantNotes" placeholder="Optional. Do not include sensitive documents or details."></textarea></div></section>

@@ -90,3 +90,127 @@ function stepper(){return `<div class="stepper" aria-label="Preliminary analysis
 function page(title,copy,body){const note=['baseline','settings','opportunity'].includes(state.route)?`<div class="notice warning persistent-note"><strong>Research prototype note</strong><br>Use fictional or rounded values; report outcomes are preset research fixtures. Entered compensation is not calculated into the displayed research outcome.</div>`:'';return `<section class="page-head"><div class="eyebrow">Preliminary screen</div><h2>${title}</h2><p>${copy}</p>${note}</section>${body}`}
 function settings(){const mode=state.form.minimumPreferenceMode||'unsure',timeEnabled=Boolean(state.form.timeEnabled);const inputs=mode==='number'?`<div class="field-grid section">${field('Minimum improvement percentage','minimumPercent','e.g., 10%',false)}${field('Minimum improvement dollars','minimumDollars','e.g., $12,000',false)}${field('Clearly compelling improvement (optional)','preferredDollars','e.g., $20,000',false)}</div>`:'';return page('Define what makes a move worthwhile for you.','These are personal preferences, not objective market values. They remain separate from the job’s direct economics.',`${stepper()}<div class="card"><div class="section"><h3>Required improvement</h3><p class="helper">You do not need to arrive with a fixed number. This prototype is testing which way of thinking about a move feels natural.</p><div class="field"><label for="minimumPreferenceMode">How clear is your minimum improvement requirement?</label><select id="minimumPreferenceMode"><option value="number" ${mode==='number'?'selected':''}>I have a number in mind</option><option value="unsure" ${mode==='unsure'?'selected':''}>I’m not sure</option><option value="skip" ${mode==='skip'?'selected':''}>Skip for now</option></select></div>${inputs}<div class="field section"><label><input id="timeEnabled" type="checkbox" ${timeEnabled?'checked':''} /> Include my own value of additional or saved time</label><p class="helper">Optional. This is a personal assumption, shown separately from employer compensation.</p><input id="timeValue" value="${escapeAttr(state.form.timeValue||'')}" placeholder="$ per hour" ${timeEnabled?'':'disabled'} /></div></div><div class="section"><h3>Hard conditions</h3><div class="field-grid">${field('Maximum office days each week','maxOffice','2',false)}${field('Maximum one-way commute','maxCommute','45 minutes',false)}${field('Minimum usable PTO','minPto','15 days',false)}${field('Maximum travel','maxTravel','10%',false)}${field('Relocation','relocation','Not permitted',false)}${field('Provider / access condition','provider','Optional; e.g., specialist must be in network',false)}<div class="field full"><label for="customCondition">Custom condition</label><input id="customCondition" value="${escapeAttr(state.form.customCondition||'')}" placeholder="e.g., planned leave must be honored" /></div></div></div><div class="notice">Hard conditions do not turn into dollars. A financially attractive opportunity can still conflict with a condition you set.</div><div class="nav-actions"><button class="secondary-button" data-route="baseline">Back</button><button class="primary-button" data-next="opportunity">Continue</button></div></div>`) }
 function bind(){document.querySelectorAll('[data-route]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.route)));document.querySelectorAll('[data-next]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.next)));document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{const group=b.parentElement;group.querySelectorAll('.chip').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');state.form.provenance=state.form.provenance||{};state.form.provenance[group.dataset.provenance]=b.dataset.value;log('provenance_selected',{field:group.dataset.provenance,provenance:b.dataset.value})}));const mode=$('#minimumPreferenceMode');if(mode)mode.onchange=()=>{captureVisibleForm();render()};const time=$('#timeEnabled');if(time)time.onchange=()=>{captureVisibleForm();render()};const reserve=$('#reserve29');if(reserve)reserve.onclick=()=>{state.pricing='reserve';state.passUnlocked=true;log('pricing_action',{action:'reserve_29'});toast('Reservation intent recorded for this research prototype.');setTimeout(()=>go('report'),350)};const decline=$('#decline29');if(decline)decline.onclick=()=>pricingDecline();const now=$('#notNow');if(now)now.onclick=()=>{state.pricing='not_now';log('pricing_action',{action:'not_now'});go('free');toast('Response logged. Continue exploring the free result or return to opportunity details.')};document.querySelectorAll('[data-scenario]').forEach(b=>b.onclick=()=>{state.scenario=b.dataset.scenario;state.scenarioEdited=false;log('scenario_selected',{scenario:state.scenario,fixture:state.fixture});render()});const upd=$('#updateScenario');if(upd)upd.onclick=()=>{state.scenarioEdited=true;log('scenario_preset_applied',{scenario:state.scenario,fixture:state.fixture,salary:$('#scenarioSalary')?.value,officeDays:$('#scenarioOffice')?.value});render();toast('Preset hypothetical outcome applied and displayed.')};const rev=$('#saveRevision');if(rev)rev.onclick=()=>{state.revisionSaved=true;log('revision_saved',{fixture:state.fixture});toast('Fixture-specific simulated revision saved.')};const exp=$('#simulateExport');if(exp)exp.onclick=()=>{log('export_preview_opened',{fixture:state.fixture,scenario:state.scenario});toast('Export simulation opened — no file was created.')};const del=$('#deleteLocal');if(del)del.onclick=()=>{state={route:'landing',fixture:'A',step:0,passUnlocked:false,scenario:'Actual package',scenarioEdited:false,revisionSaved:false,pricing:null,events:[],form:{timeValue:'25',stage:'Recruiter outreach',minimumPreferenceMode:'unsure',timeEnabled:false}};render();toast('Local prototype data cleared. The event log is empty and the prototype returned Home.')}}
+
+// Final pre-pilot study controls. These override earlier prototype helpers while
+// keeping results fixture-driven and participant inputs out of research exports.
+const preliminaryRoutes=['context','baseline','settings','opportunity'];
+function go(route){
+  captureVisibleForm();
+  state.route=route;
+  const index=preliminaryRoutes.indexOf(route);
+  if(index>=0)state.step=index;
+  log('screen_visited',{route});
+  render();
+  window.scrollTo(0,0);
+}
+function page(title,copy,body){
+  const note=preliminaryRoutes.includes(state.route)
+    ?`<div class="notice warning persistent-note"><strong>Research prototype note</strong><br>Use rough, rounded, or fictionalized values here—do not spend time researching them. This prototype tests the experience; its report is a preset example, not calculated from your entries. A later historical intake collects the actual information for the personalized retrospective analysis.</div>`
+    :'';
+  return `<section class="page-head"><div class="eyebrow">Preliminary screen</div><h2>${title}</h2><p>${copy}</p>${note}</section>${body}`;
+}
+function pass(){
+  const choice=state.pricing==='reserve'?'You selected: I’d reserve this at $29.'
+    :state.pricing==='not_at_29'?'You selected: Not at $29.'
+    :state.pricing==='not_now'?'You selected: Not now.':'';
+  const continuation=state.pricingCompleted
+    ?`<div class="notice section"><strong>Research continuation</strong><br>Your response has been recorded. Continuing is for research only—it is not a purchase, reservation, or payment commitment.</div><button class="primary-button" id="continueResearch">Continue to the full report for research</button>`
+    :`<div class="grid"><button class="primary-button" id="reserve29">I’d reserve this at $29</button><button class="secondary-button" id="decline29">Not at $29</button><button class="secondary-button" id="notNow">Not now</button></div>`;
+  return `<section class="page-head"><div class="eyebrow">Research-mode offer</div><h2>Follow one opportunity through its decision process.</h2><p>Update the same analysis as salary, benefits, timing, and work details change. This prototype simulates a reservation; it does not process payment.</p></section><div class="grid two"><div class="card"><div class="price">$29</div><h3>Opportunity Decision Pass</h3><ul class="list"><li>Exact recurring ranges and target gap</li><li>One-time transition and make-whole view</li><li>Conditions, completeness, and sensitivity</li><li>Up to three alternative scenarios</li><li>Mock printable decision report</li></ul><p class="helper">Access is framed around this opportunity’s decision process; the prototype does not promise a fixed duration.</p></div><div class="card"><h3>${state.pricingCompleted?'Research response recorded':'Would you reserve this at $29?'}</h3><p>${state.pricingCompleted?choice:'This is a research question only. No payment will be taken here.'}</p>${continuation}</div></div>`;
+}
+function pricingDecline(){
+  state.pricing='not_at_29';
+  log('pricing_action',{action:'not_at_29'});
+  document.body.insertAdjacentHTML('beforeend',`<div class="modal-backdrop" id="priceModal"><div class="modal"><div class="eyebrow">Research question</div><h2>What makes you hesitate at $29?</h2><textarea id="declineReason" placeholder="Tell us in your own words."></textarea><div class="nav-actions"><button class="secondary-button" id="closeModal">Cancel</button><button class="primary-button" id="reasonNext">Continue</button></div></div></div>`);
+  $('#closeModal').onclick=()=>$('#priceModal').remove();
+  $('#reasonNext').onclick=()=>{
+    log('pricing_decline_reason',{reason:$('#declineReason').value});
+    $('#priceModal .modal').innerHTML=`<div class="eyebrow">Research question</div><h2>Is there a price where this would become something you would seriously consider?</h2><p>We want your own answer before showing any comparison prices.</p><input id="lowerPrice" placeholder="Enter a price, or leave blank" /><div class="nav-actions"><button class="secondary-button" id="closeModal">Skip</button><button class="primary-button" id="lowerNext">Continue</button></div>`;
+    $('#closeModal').onclick=()=>$('#priceModal').remove();
+    $('#lowerNext').onclick=()=>{
+      log('unaided_lower_price',{price:$('#lowerPrice').value});
+      $('#priceModal .modal').innerHTML=`<div class="eyebrow">Exploratory only</div><h2>How would each price change your reaction?</h2><p>These are not discounted offers and no payment is processed. Select one reaction for each price.</p>${['19','39','59'].map(p=>`<div class="section"><strong>$${p}</strong><div class="inline-actions"><button class="secondary-button" data-price="${p}" data-reaction="would_seriously_consider">Would seriously consider</button><button class="secondary-button" data-price="${p}" data-reaction="no_change">No change</button><button class="secondary-button" data-price="${p}" data-reaction="less_likely">Less likely</button></div></div>`).join('')}<div class="nav-actions"><span></span><button class="primary-button" id="finishPricing">Finish</button></div>`;
+      document.querySelectorAll('[data-reaction]').forEach(button=>button.onclick=()=>{
+        document.querySelectorAll(`[data-price="${button.dataset.price}"]`).forEach(item=>item.classList.remove('selected'));
+        button.classList.add('selected');
+        log('exploratory_price_reaction',{price:button.dataset.price,reaction:button.dataset.reaction});
+      });
+      $('#finishPricing').onclick=()=>{ $('#priceModal').remove(); state.pricingCompleted=true; go('pass'); toast('Pricing feedback recorded.'); };
+    };
+  };
+}
+function participantSession(){
+  const allowed=new Set(['prototype_started','screen_visited','pricing_action','pricing_decline_reason','unaided_lower_price','exploratory_price_reaction','research_continuation','scenario_selected','scenario_preset_applied','revision_saved','export_preview_opened']);
+  const events=state.events.filter(item=>allowed.has(item.event)).map(item=>{
+    const clean={time:item.time,event:item.event};
+    if(item.event==='screen_visited')clean.route=item.route;
+    if(item.event==='pricing_action')clean.action=item.action;
+    if(item.event==='pricing_decline_reason')clean.reason=item.reason;
+    if(item.event==='unaided_lower_price')clean.price=item.price;
+    if(item.event==='exploratory_price_reaction'){clean.price=item.price;clean.reaction=item.reaction;}
+    if(item.event==='scenario_selected'||item.event==='scenario_preset_applied')clean.scenario=item.scenario;
+    return clean;
+  });
+  const visited=new Set(events.filter(item=>item.event==='screen_visited').map(item=>item.route));
+  return {
+    schema_version:'career-value-tracker-participant-session-v1',
+    prototype_version:'phase-4-research-prototype',
+    exported_at:new Date().toISOString(),
+    pricing:{choice:state.pricing||null,completed:Boolean(state.pricingCompleted)},
+    completion:{preliminary_completed:visited.has('free'),full_report_reviewed:visited.has('report'),scenarios_reviewed:visited.has('scenarios'),revision_reviewed:visited.has('revision'),export_preview_reviewed:visited.has('export')},
+    events
+  };
+}
+function downloadParticipantSession(){
+  log('participant_session_exported');
+  const blob=new Blob([JSON.stringify(participantSession(),null,2)],{type:'application/json'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download='career-value-tracker-research-session.json';
+  link.click();
+  URL.revokeObjectURL(link.href);
+  toast('Research session downloaded.');
+}
+function exportView(){
+  let x=f();
+  return `<section class="page-head"><div class="eyebrow">Mock export</div><h2>Printable Decision Report preview</h2><p>This is a visual prototype only. No report file is generated or sent.</p></section><article class="export-sheet"><header><div class="eyebrow">Career Value Tracker</div><h2>Opportunity Decision Report</h2><p>Prepared for one active opportunity · ${x.stage}</p></header><h3>${x.headline}</h3><p>Recurring opportunity value: <strong>${x.range}</strong> · Minimum target: <strong>${x.minimum}</strong></p><hr><h3>At a glance</h3><ul><li>One-time transition: ${x.makeWhole}</li><li>Conditions: ${x.conditions}</li><li>Completeness: ${x.complete}</li><li>Sensitivity: ${x.sensitivity}</li></ul><p class="footer-note">Gross/pre-tax where applicable. User-selected time assumptions are identified separately. This is a decision aid, not financial, legal, or career advice.</p></article><div class="inline-actions section"><button class="secondary-button" id="simulateExport">Simulate export preview</button><button class="primary-button" id="downloadParticipantSession">Download research session</button><button class="secondary-button" data-route="report">Back to report</button></div><p class="helper">The research-session download contains only pricing and completion evidence. It does not include values entered in the prototype.</p>`;
+}
+function bind(){
+  document.querySelectorAll('[data-route]').forEach(button=>button.addEventListener('click',()=>go(button.dataset.route)));
+  document.querySelectorAll('[data-next]').forEach(button=>button.addEventListener('click',()=>go(button.dataset.next)));
+  document.querySelectorAll('.chip').forEach(button=>button.addEventListener('click',()=>{
+    const group=button.parentElement;
+    group.querySelectorAll('.chip').forEach(item=>item.classList.remove('selected'));
+    button.classList.add('selected');
+    state.form.provenance=state.form.provenance||{};
+    state.form.provenance[group.dataset.provenance]=button.dataset.value;
+    log('provenance_selected',{field:group.dataset.provenance,provenance:button.dataset.value});
+  }));
+  const mode=$('#minimumPreferenceMode'); if(mode)mode.onchange=()=>{captureVisibleForm();render()};
+  const time=$('#timeEnabled'); if(time)time.onchange=()=>{captureVisibleForm();render()};
+  const reserve=$('#reserve29'); if(reserve)reserve.onclick=()=>{state.pricing='reserve';state.pricingCompleted=true;log('pricing_action',{action:'reserve_29'});render()};
+  const decline=$('#decline29'); if(decline)decline.onclick=()=>pricingDecline();
+  const now=$('#notNow'); if(now)now.onclick=()=>{state.pricing='not_now';state.pricingCompleted=true;log('pricing_action',{action:'not_now'});go('pass')};
+  const continuation=$('#continueResearch'); if(continuation)continuation.onclick=()=>{state.passUnlocked=true;log('research_continuation',{pricing_choice:state.pricing});go('report')};
+  document.querySelectorAll('[data-scenario]').forEach(button=>button.onclick=()=>{state.scenario=button.dataset.scenario;state.scenarioEdited=false;log('scenario_selected',{scenario:state.scenario});render()});
+  const update=$('#updateScenario'); if(update)update.onclick=()=>{state.scenarioEdited=true;log('scenario_preset_applied',{scenario:state.scenario});render();toast('Preset hypothetical outcome applied and displayed.')};
+  const revision=$('#saveRevision'); if(revision)revision.onclick=()=>{state.revisionSaved=true;log('revision_saved');toast('Fixture-specific simulated revision saved.')};
+  const preview=$('#simulateExport'); if(preview)preview.onclick=()=>{log('export_preview_opened');toast('Export preview opened — no file was created.')};
+  const session=$('#downloadParticipantSession'); if(session)session.onclick=downloadParticipantSession;
+  const deleteButton=$('#deleteLocal'); if(deleteButton)deleteButton.onclick=()=>{state={route:'landing',fixture:'A',step:0,passUnlocked:false,scenario:'Actual package',scenarioEdited:false,revisionSaved:false,pricing:null,pricingCompleted:false,events:[],form:{timeValue:'25',stage:'Recruiter outreach',minimumPreferenceMode:'unsure',timeEnabled:false}};render();toast('Local prototype data cleared. The event log is empty and the prototype returned Home.')};
+}
+render();
+if(researchMode&&selector){
+  selector.onchange=event=>{
+    state.fixture=event.target.value;
+    state.passUnlocked=false;
+    state.pricing=null;
+    state.pricingCompleted=false;
+    state.scenario='Actual package';
+    state.scenarioEdited=false;
+    state.revisionSaved=false;
+    log('fixture_loaded',{fixture:state.fixture});
+    render();
+    toast('Research fixture loaded.');
+  };
+}
